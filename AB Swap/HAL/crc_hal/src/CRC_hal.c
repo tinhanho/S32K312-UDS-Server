@@ -36,8 +36,10 @@ When you update, please do not forgot to del me and add your info at here.
 #include "CRC_hal.h"
 
 #ifdef EN_CRC_HARDWARE
-#include "cpu.h"
-#include "crc_cfg.h"
+//#include "cpu.h"
+//#include "crc_cfg.h"
+#include "Crc_Ip.h"
+#include "CDD_Crc.h"
 #endif
 
 /*******************************************************************************
@@ -102,7 +104,7 @@ static void CreatSoftwareCrc16(const uint8 *i_pDataBuf, const uint32 i_dataLen, 
 **	data 			NULL
 **	return 			Null
 ************************************************************/
-static void Crc_Init(void);
+//static void Crc_Init(void);
 
 /************************************************************
 **	Description :	using MCU hardware to create crc. Input data in @ i_pucDataBuf
@@ -119,15 +121,15 @@ static void CreatHardwareCrc16(const uint8_t *i_pucDataBuf, const uint32_t i_ulD
  *
  * Implements : CRC_Init_Activity
  *END**************************************************************************/
-boolean CRC_HAL_Init(void)
-{
-#ifdef EN_CRC_HARDWARE
-	Crc_Init();
-#endif
-
-
-    return TRUE;
-}
+//boolean CRC_HAL_Init(void)
+//{
+//#ifdef EN_CRC_HARDWARE
+//	Crc_Init();
+//#endif
+//
+//
+//    return TRUE;
+//}
 
 /*FUNCTION**********************************************************************
  *
@@ -158,7 +160,7 @@ void CRC_HAL_CreatSoftwareCrc(const uint8_t *i_pucDataBuf, const uint32_t i_ulDa
 {
 #ifdef EN_CRC_SOFTWARE
 	CreatSoftwareCrc16(i_pucDataBuf, i_ulDataLen, m_pCurCrc);
-#elif EN_CRC_HARDWARE
+#elif (defined EN_CRC_HARDWARE)
 	CreatHardwareCrc16(i_pucDataBuf, i_ulDataLen, m_pCurCrc);
 #else
 	#error "Pls define EN_CRC_SOFTWARE or EN_CRC_HARDWARE!"
@@ -229,6 +231,7 @@ void CRC_HAL_EndSoftwareCrc(uint32 *m_pCurCrc)
 	{
 		*m_pCurCrc = (uint32)((~crc) & 0xFFFFu);
 	}
+/* Inversion has been done in CRC engine*/
 }
 
 /*FUNCTION**********************************************************************
@@ -243,14 +246,18 @@ void CRC_HAL_CalculateCRCOnce(const uint8_t *i_pucDataBuf, const uint32_t i_ulDa
 	CRC_HAL_StartSoftwareCrc(m_pCurCrc);
 #ifdef EN_CRC_SOFTWARE 
 	CreatSoftwareCrc16(i_pucDataBuf, i_ulDataLen, m_pCurCrc);
-#elif EN_CRC_HARDWARE
-	EN_CRC_HARDWARE(i_pucDataBuf, i_ulDataLen, m_pCurCrc);
+#elif (defined EN_CRC_HARDWARE)
+	CreatHardwareCrc16(i_pucDataBuf, i_ulDataLen, m_pCurCrc);
 #else
 	#error "Pls define EN_CRC_HARDWARE or EN_CRC_SOFTWARE"
 #endif
 
+
+#ifdef EN_CRC_SOFTWARE
 	CRC_HAL_EndSoftwareCrc(m_pCurCrc);
+#endif
 }
+
 
 #ifdef EN_CRC_HARDWARE
 /************************************************************
@@ -261,23 +268,27 @@ void CRC_HAL_CalculateCRCOnce(const uint8_t *i_pucDataBuf, const uint32_t i_ulDa
 static void CreatHardwareCrc16(const uint8_t *i_pucDataBuf, const uint32_t i_ulDataLen, uint32_t *m_pCurCrc)
 {
     /* Write your local variable definition here */
-    uint32_t result = 0u;
+    //uint32_t result = 0u;
 
 #if (defined FALSH_ADDRESS_CONTINUE) && (FALSH_ADDRESS_CONTINUE == TRUE)
     crc1_UserConfig0.seed = *m_pCurCrc;
 #endif	//end of MCU_USE_PAGING
 
     /* Init crc hardware */
-    CRC_DRV_Init(INST_CRC1, &crc1_UserConfig0);
+    //CRC_DRV_Init(INST_CRC1, &crc1_UserConfig0);
 
 
     /* Calculate CRC value for CRC_data with configuration of 16 of 32bit wide result */
-    CRC_DRV_WriteData(INST_CRC1, i_pucDataBuf, i_ulDataLen);
-    result = CRC_DRV_GetCrcResult(INST_CRC1);
+    // CRC_DRV_WriteData(INST_CRC1, i_pucDataBuf, i_ulDataLen);
+    // result = CRC_DRV_GetCrcResult(INST_CRC1);
+    *m_pCurCrc = Crc_SetChannelCalculate(CRC_LOGIC_CHANNEL_0, i_pucDataBuf, i_ulDataLen, *m_pCurCrc, FALSE);
+    //Crc_GetChannelResult(CRC_LOGIC_CHANNEL_0);
 
-    *m_pCurCrc = result;
+    //*m_pCurCrc = result;
 }
+#endif
 
+#if 0 /* Below is initialized in Wct_SystemHWInit.c*/
 /************************************************************
 **	Description :	init hardware crc
 **	data 			NULL

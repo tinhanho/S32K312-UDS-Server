@@ -1,7 +1,15 @@
 #include "uds_app.h"
 #include "TP.h"
+#include "crypto_hal.h"
 //#include "Boot.h"
 
+#ifdef MAC_SUPPORTED
+#define CRYPTO_START_SEC_VAR_INIT_UNSPECIFIED_NO_CACHEABLE
+#include "Crypto_MemMap.h"
+static uint8 gs_MACBuffer[AES_CMAC_OUTPUT_LEN];
+
+#define CRYPTO_STOP_SEC_VAR_INIT_UNSPECIFIED_NO_CACHEABLE
+#endif
 /*********************************************************/
 
 /*UDS init*/
@@ -34,6 +42,21 @@ void UDS_MainFun(void)
                                         &stUdsAppMsg.xDataLen,
                                         stUdsAppMsg.aDataBuf))
     {
+
+#ifdef MAC_SUPPORTED
+        if
+        (TRUE != CRYPTO_HAL_VerifyMAC
+            (
+                stUdsAppMsg.aDataBuf, 
+                (uint32)(stUdsAppMsg.xDataLen - AES_CMAC_OUTPUT_LEN),
+                &(stUdsAppMsg.aDataBuf[stUdsAppMsg.xDataLen - AES_CMAC_OUTPUT_LEN]),
+                AES_CMAC_OUTPUT_LEN
+            )
+        )
+        {
+            return;
+        }
+#endif
         UDS_SetIsRxUdsMsg(TRUE);
 
         if(TRUE != UDS_IsCurDefaultSession())
@@ -115,6 +138,13 @@ void UDS_MainFun(void)
     {
         stUdsAppMsg.xUdsId = TP_GetConfigTxMsgID();
 
+#ifdef MAC_SUPPORTED
+	if(TRUE == CRYPTO_HAL_GetMAC(stUdsAppMsg.aDataBuf, (uint32)(stUdsAppMsg.xDataLen), gs_MACBuffer))
+	{
+		memcpy(&stUdsAppMsg.aDataBuf[stUdsAppMsg.xDataLen], gs_MACBuffer, AES_CMAC_OUTPUT_LEN);
+		stUdsAppMsg.xDataLen += AES_CMAC_OUTPUT_LEN;
+	}
+#endif
         (void)TP_WriteAFrameDataInTP(stUdsAppMsg.xUdsId,
                                      stUdsAppMsg.pfUDSTxMsgServiceCallBack,
                                      stUdsAppMsg.xDataLen,

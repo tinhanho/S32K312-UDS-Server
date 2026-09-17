@@ -1116,7 +1116,7 @@ static boolean Flash_DoChecksum(boolean *o_pbIsOperateFinsh)
 			break;
 
 		case END_CHECKSUM:
-			
+
 			CRC_HAL_EndSoftwareCrc(&s_xCountCrc);
 			Flash_SaveCalculateCRCValue(s_xCountCrc);
 			isOperateFinsh = TRUE;

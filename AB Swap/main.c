@@ -45,6 +45,8 @@ extern "C" {
 #include "uds_app.h"
 #include "MemAcc.h"
 #include "fls_app.h"
+#include "CRC_hal.h"
+#include "crypto_hal.h"
 
 #if PROPRIETARY_PROTOCOL_SUPPORTED
 #include "Wct_HalPp.h"
@@ -100,11 +102,33 @@ int main(void)
 	SampleAppInitTask();
     APP_Demo_Init();
 	
-	
+	const uint8 *myKey = "myKey0123456789A";
+
+	CRYPTO_HAL_SetKey(myKey, AES_KEY_LEN);
+
 	/*
 	=========================================TEST START=========================================
-	HSE_FirmwareUpdate(0);
+	const uint8 *myKey = "myKey0123456789A";
+	const uint8 *myData = "myData";
+	uint8 outMAC[16];
 
+	CRYPTO_HAL_SetKey(myKey, AES_KEY_LEN);
+
+	CRYPTO_HAL_GetMAC(myData, 6, &outMAC);
+
+	for(uint8 i=0; i<16; ++i)
+	{
+		SPRT_PrintWordValueInHex(outMAC[i]);
+	}
+	SPRT_PrintString("\r\n");
+
+	uint8 testData[8] = {0xA5, 0x5A, 0xA5, 0x5A, 0x01, 0x02, 0x03, 0x04};
+	uint16 res = 0;
+	CRC_HAL_CreatHardwareCrc(&testData, 8, &res);
+	for(uint8 i=0; i<2; i++) SPRT_PrintHexChar(res>>(8*i));
+	SPRT_PrintString("\r\n");
+
+    HSE_FirmwareUpdate(0);
 	HSE_ActivatePassiveBlock(0);
 
 	MemAcc_Erase(MEMACC_ADDRESS_AREA_1_ID, 0, 0x2000);

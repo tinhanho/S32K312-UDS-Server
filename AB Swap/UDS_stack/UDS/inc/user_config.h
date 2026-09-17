@@ -99,10 +99,10 @@ do{\
 
 /***********************CRC config****************************/
 /*enable CRC module with hardware*/
-//#define EN_CRC_HARDWARE
+#define EN_CRC_HARDWARE
 
 /*enable CRC module with software*/
-#define EN_CRC_SOFTWARE
+//#define EN_CRC_SOFTWARE
 
 /*FLASH address continue or not*/
 #define FALSH_ADDRESS_CONTINUE (FALSE)
@@ -178,6 +178,8 @@ typedef enum
 #define DELAY_MAX_TIME_MS (5000u)
 
 /***********************************************************/
+
+#define MAC_SUPPORTED
 
 #endif /*__USER_CONFIG_H__*/
 

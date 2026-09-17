@@ -35,7 +35,6 @@ When you update, please do not forgot to del me and add your info at here.
 
 #include "TP.h"
 
-
 /*******************************************************************************
  * User Include
  ******************************************************************************/
@@ -204,7 +203,7 @@ boolean TP_WriteAFrameDataInTP(const uint32 i_TxMsgID,
 	{
 		return FALSE;
 	}
-
+	
 	/*write data in fifo*/
 	WriteDataInFifo(TX_TP_QUEUE_ID, (uint8 *)i_pDataBuf, xWritDataLen, &eStatus);
 	if(ERRO_NONE != eStatus)

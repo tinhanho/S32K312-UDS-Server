@@ -1,4 +1,3 @@
-//#include "includes.h"0
 //#include "includes.h"
 #include "standardTypes.h"
 #include "user_config.h"
@@ -6,10 +5,12 @@
 #ifdef EN_CAN_TP
 #include "can_tp_cfg.h"
 #include "multi_cyc_fifo.h"
+#include "crypto_hal.h"
+
 //#include "can_driver.h"
 static tpfAbortTxMsg gs_pfCANTPAbortTxMsg = NULL_PTR;
 static tpfNetTxCallBack gs_pfTxMsgSuccessfulCallBack = NULL_PTR;
-
+static uint8 gs_MACBuffer[AES_CMAC_OUTPUT_LEN];
 
 static uint8 CANTP_TxMsg(const tUdsId i_xTxId,
 							  const uint16 i_dataLen, 
