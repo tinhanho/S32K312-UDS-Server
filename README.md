@@ -1,4 +1,4 @@
-# MWCT2016S-UDS-Server
+# S32K312-UDS-Server
 
 UDS application, CAN bootloader, and A/B swap examples for the NXP S32K3 platform.
 
